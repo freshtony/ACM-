@@ -106,7 +106,7 @@ void point_assign(int p,int val,int l,int r,int rt) {
 	}
 	int m=(l+r)>>1;
 	if (p<=m) point_assign(p,val,lson);
-	else      point_assign(p,val,lson);
+	else      point_assign(p,val,rson);
 	PushUp(rt);
 }
 
