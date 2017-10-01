@@ -5,15 +5,17 @@
 #include <vector>
 using namespace std;
 typedef long long LL;
+//快速读入数字，字符串用scanf("%s")即可（速度差不多，代码 
 
 /***********************************************************************************
                                         读入数字
 ************************************************************************************/
-int scan() {
+int read_num() {
 	int res=0;
 	bool flag=false;
 	int ch;
-	if ( ( ch=getchar() ) == '-') flag=true;
+	while( (ch=getchar())==' ' || ch=='\n') ;
+	if ( ch == '-') flag=true;
 	else if (ch>='0' && ch<='9') res=ch-'0';
 	while( (ch=getchar()) >='0' && ch<='9' )
 		res=res*10+ch-'0';
@@ -46,19 +48,19 @@ void print(int x) {
 **************************************************************************************************************************/
 void solve() {
 	int n,m;
-	n=scan();
-	m=scan();
+	n=read_num();
+	m=read_num();
 	int a[n];
 	for (int i=0; i<n; i++) {
-		a[i]=scan();
+		a[i]=read_num();
 		print(a[i]);
 		putchar(' ');
 	}
 	putchar('\n');
 	int left[m],right[m];
 	for (int i=0;i<m;i++){
-		left[i]=scan();
-		right[i]=scan();
+		left[i]=read_num();
+		right[i]=read_num();
 		print(left[i]);
 		putchar(' ');
 		print(right[i]);
