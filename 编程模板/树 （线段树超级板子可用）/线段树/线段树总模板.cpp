@@ -27,7 +27,7 @@ void PushDown(int rt,int l,int r) {
 	if (add[rt]) {			//区间增减
 		add[rt<<1]+=add[rt];
 		add[rt<<1 | 1]+=add[rt];
-		int m=l+(m-l)/2;
+		int m=(l+r)>>1; 
 		SUM[rt<<1]+=add[rt]*(m-l+1);
 		SUM[rt<<1 | 1]+=add[rt]*(r-m);
 		MAX[rt<<1]+=add[rt];
@@ -39,7 +39,7 @@ void PushDown(int rt,int l,int r) {
 	if(change[rt]) {			//区间赋值
 		change[rt<<1]=change[rt];
 		change[rt<<1 | 1]=change[rt];
-		int m=l+(r-l)/2;
+		int m=(l+r)>>1;
 		SUM[rt<<1]=(m-l+1)*change[rt];
 		SUM[rt<<1 | 1]=(r-m)*change[rt];
 		MAX[rt<<1]+=add[rt];
@@ -59,8 +59,9 @@ void PushDown(int rt,int l,int r) {
 ************************************************************************************/
 void build(int l,int r,int rt) {    //
 	add[rt]=0;
+	change[rt]=0;
 	if (l==r) {
-		scanf("%lld",&SUM[rt]);
+		cin>>SUM[rt];
 		MAX[rt]=SUM[rt];
 		MIN[rt]=SUM[rt];
 		return ;
@@ -79,16 +80,16 @@ void build(int l,int r,int rt) {    //
                                     单点增减 p位置+add
 ************************************************************************************/
 
-void point_add(int p,int add,int l,int r,int rt) {
+void point_add(int p,int addv,int l,int r,int rt) {
 	if (l==r) {
-		SUM[rt]+=add;
-		MAX[rt]+=add;
-		MIN[rt]+=add;
+		SUM[rt]+=addv;
+		MAX[rt]+=addv;
+		MIN[rt]+=addv;
 		return ;
 	}
 	int m=(l+r)>>1;
-	if (p<=m) point_add(p,add,lson);
-	else      point_add(p,add,rson);
+	if (p<=m) point_add(p,addv,lson);
+	else      point_add(p,addv,rson);
 	PushUp(rt);
 }
 
@@ -123,7 +124,7 @@ void interval_add(int L,int R,int addv,int l,int r,int rt) {
 		return ;
 	}
 	PushDown(rt,l,r);
-	int m=l+(r-l)/2;
+	int m=(l+r)>>1;
 	if(L<=m) interval_add(L,R,addv,lson);
 	if(R>m) interval_add(L,R,addv,rson);
 	PushUp(rt);
@@ -142,7 +143,7 @@ void interval_assign(int L,int R,int val,int l,int r,int rt) {
 		return ;
 	}
 	PushDown(rt,l,r);
-	int m=l+(r-l)/2;
+	int m=(l+r)>>1;
 	if(L<=m) interval_assign(L,R,val,lson);
 	if(R>m) interval_assign(L,R,val,rson);
 	PushUp(rt);
