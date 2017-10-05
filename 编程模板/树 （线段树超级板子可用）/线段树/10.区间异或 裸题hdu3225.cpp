@@ -5,26 +5,32 @@
 #include <vector>
 using namespace std;
 typedef long long LL;
+const int N=65536*2+1;
+const int inf=0x3f3f3f3f;
 #define lson l,m,rt<<1
 #define rson m+1,r,rt<<1 | 1
-#define root 0,n,1
-const int N=1e5+2;
-const int inf=0x3f3f3f3f;
-int change[4*N],XOR[4*N];
+#define root 0,N,1
+int assign[4*N+20],XOR[4*N+20],ans[2*N+10];
+/***********************************************************************************
+                            		异或 
+************************************************************************************/
+void reserve(int rt){
+	if (assign[rt]!=-1) assign[rt]^=1;
+	else XOR[rt]^=1;
+} 
+
 /***********************************************************************************
                             向下传递（懒惰算法）(区间修改时加上去）
 ************************************************************************************/
 void PushDown(int rt,int l,int r) {
-	if (change[rt]!=-1) {
-		change[rt<<1]=change[rt<<1 | 1]=change[rt];
-		change[rt]=-1;
-		XOR[rt]=XOR[rt<<1]=XOR[rt<<1 | 1]=0;
+	if (assign[rt]!=-1) {
+		assign[rt<<1]=assign[rt<<1 | 1]=assign[rt];
+		assign[rt]=-1;
+		XOR[rt<<1]=XOR[rt<<1 | 1]=0;
 	}
 	if (XOR[rt]) {
-		if (change[rt<<1]!=-1) change[rt<<1]^=1;
-		else XOR[rt<<1]^=1;
-		if (change[rt<<1 | 1]!=-1) change[rt<<1 |1]^=1;
-		else XOR[rt<<1 |1]^=1;
+		reserve(rt<<1);
+		reserve(rt<<1 | 1);
 		XOR[rt]=0;
 	}
 }
@@ -35,9 +41,8 @@ void PushDown(int rt,int l,int r) {
 ************************************************************************************/
 
 void interval_assign(int L,int R,int val,int l,int r,int rt) {
-	if (l>r) return;
 	if (L<=l && r<=R) {
-		change[rt]=val;
+		assign[rt]=val;
 		XOR[rt]=0;
 		return ;
 	}
@@ -48,30 +53,27 @@ void interval_assign(int L,int R,int val,int l,int r,int rt) {
 }
 
 /***********************************************************************************
-                                区间赋值（l,r)  = val
+                                	区间异或 
 ************************************************************************************/
 
-void turn_01(int L,int R,int l,int r,int rt) {
-	if (l>r) return;
+void FXOR(int L,int R,int l,int r,int rt) {
 	if (L<=l && r<=R) {
-		if (change[rt]!=-1) change[rt]^=1;
-		else XOR[rt]^=1;
+		reserve(rt);
 		return ;
 	}
 	PushDown(rt,l,r);
 	int m=(l+r)>>1;
-	if(L<=m) turn_01(L,R,lson);
-	if(R>m) turn_01(L,R,rson);
+	if(L<=m) FXOR(L,R,lson);
+	if(R>m) FXOR(L,R,rson);
 }
 
 
 /***********************************************************************************
-                                    区间（L,R)求和
+                                    区间（L,R)
 ************************************************************************************/
-
 void query(int l,int r,int rt) {
 	if (l==r) {
-		if (change[rt]==1) cout<<l<<"  ";
+		ans[l]=assign[rt];
 		return;
 	}
 	PushDown(rt,l,r);
@@ -87,18 +89,22 @@ void query(int l,int r,int rt) {
                                                             主程序
 **************************************************************************************************************************/
 void solve() {
-	memset(change,-1,sizeof(change));
-	char ch0,ch1,ch2,ch3;
+	memset(assign,0,sizeof(assign));
+	memset(XOR,0,sizeof(XOR));
+	memset(ans,0,sizeof(ans)); 
+	char ch0,ch1,ch2;
 	int L,R;
-	int n=N;
-	while(cin>>ch0>>ch1>>L>>ch2>>R>>ch3) {
-		if (L>R) continue;
+	while(scanf(" %c %c%d,%d%c",&ch0,&ch1,&L,&R,&ch2)!=EOF) {
 		L<<=1;
 		R<<=1;
-		
 		if (ch1=='(') L++;
-		if (ch3==')') R--;
-	
+		if (ch2==')') R--;
+		if (L>R) {
+			if (ch0=='I' || ch0=='C') {
+				assign[1]=XOR[1]=0;
+			}
+			continue;
+		}
 		switch(ch0) {
 			case 'U': {
 				interval_assign(L,R,1,root);
@@ -109,32 +115,40 @@ void solve() {
 				break;
 			}
 			case 'I': {
-				interval_assign(0,L-1,0,root);
-				interval_assign(R+1,N,0,root);
+				if(L>0) interval_assign(0,L-1,0,root);
+				if (R<N) interval_assign(R+1,N,0,root);
 				break;
 			}
 			case 'S': {
-				turn_01(L,R,root);
+				FXOR(L,R,root);
 				break;
 			}
 			case 'C': {
-				interval_assign(0,L-1,0,root);
-				interval_assign(R+1,N,0,root);
-				turn_01(L,R,root);
+				if(L>0) interval_assign(0,L-1,0,root);
+				if (R<N) interval_assign(R+1,N,0,root);
+				FXOR(L,R,root);
 				break;
 			}
 		}
-		cout<<ch0<<"  "<<L<<"  "<<R<<endl;
-		query(0,n,1);
-		cout<<endl;
 	}
-	
+	query(0,N,1);
+	L=0;R=-1;
+	for (int i=0; i<=N; i++) {
+		if (ans[i]==0 && ans[i+1]==1) L=i+1;
+		if (ans[i]==1 && ans[i+1]==0) {
+			R=i;
+			if (L&1) printf("(%d,",L/2);
+			else		  printf("[%d,",L/2);
+			if (R&1) 	  printf("%d) ",R/2+1);
+			else		  printf("%d] ",R/2);
+		}
+	}
+	if (L>R)	printf("empty set\n");
+	else printf("\n");
 }
 
 int main() {
-	freopen("datain.txt","r",stdin);
-	ios::sync_with_stdio(false);
-	cin.tie(0);
+//	freopen("datain.txt","r",stdin);
 	solve();
 	return 0;
 }

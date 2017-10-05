@@ -10,7 +10,7 @@ typedef long long LL;
 #define root 1,n,1
 const int N=1e5+2;
 const int inf=0x3f3f3f3f;
-int SUM[4*N],MAX[4*N],MIN[4*N],add[4*N],change[4*N];
+int SUM[4*N],MAX[4*N],MIN[4*N],add[4*N],assign[4*N];
 /***********************************************************************************
                                         向上更新
 ************************************************************************************/
@@ -36,17 +36,17 @@ void PushDown(int rt,int l,int r) {
 		MIN[rt<<1 | 1]+=add[rt];
 		add[rt]=0;
 	}
-	if(change[rt]) {			//区间赋值
-		change[rt<<1]=change[rt];
-		change[rt<<1 | 1]=change[rt];
+	if(assign[rt]) {			//区间赋值
+		assign[rt<<1]=assign[rt];
+		assign[rt<<1 | 1]=assign[rt];
 		int m=(l+r)>>1;
-		SUM[rt<<1]=(m-l+1)*change[rt];
-		SUM[rt<<1 | 1]=(r-m)*change[rt];
+		SUM[rt<<1]=(m-l+1)*assign[rt];
+		SUM[rt<<1 | 1]=(r-m)*assign[rt];
 		MAX[rt<<1]+=add[rt];
 		MAX[rt<<1 | 1]+=add[rt];
 		MIN[rt<<1]+=add[rt];
 		MIN[rt<<1 | 1]+=add[rt];
-		change[rt]=0;
+		assign[rt]=0;
 	}
 }
 
@@ -59,7 +59,7 @@ void PushDown(int rt,int l,int r) {
 ************************************************************************************/
 void build(int l,int r,int rt) {    //
 	add[rt]=0;
-	change[rt]=0;
+	assign[rt]=0;
 	if (l==r) {
 		cin>>SUM[rt];
 		MAX[rt]=SUM[rt];
@@ -136,7 +136,7 @@ void interval_add(int L,int R,int addv,int l,int r,int rt) {
 
 void interval_assign(int L,int R,int val,int l,int r,int rt) {
 	if (L<=l && r<=R) {
-		change[rt]=val;
+		assign[rt]=val;
 		SUM[rt]=val*(r-l+1);
 		MAX[rt]=val;
 		MIN[rt]=val;
